@@ -21,6 +21,8 @@ import bluevetPng5 from 'src/images/bluevet5.png'
 import bluevetPng6 from 'src/images/bluevet6.png'
 
 import {CITIES} from 'src/cities'
+import mapStyle from 'src/gmaps-style.json'
+import darkMapStyle from 'src/gmaps-style-dark.json'
 
 const API_KEY = 'AIzaSyAEKADDbfh4NsgOuAtaeazXJi9XZrkVcjQ'
 const NUM_BLUEVETS = 20
@@ -77,7 +79,6 @@ function bootstrap () {
 
   gmaps_loader.load({apiKey: API_KEY}).then(() => {
     leaflet_google.load()
-    map.addLayer(new L.GoogleGridLayer())
 
     for (let city of CITIES) {
       const coords = range(NUM_BLUEVETS).map(() => [
@@ -93,6 +94,7 @@ function bootstrap () {
     }
 
     let currentCity = 0
+    let tileLayer = null
     let movingLoop = null
 
     function moveMarkers (markers) {
@@ -113,6 +115,13 @@ function bootstrap () {
       if (currentCity === CITIES.length) currentCity = 0
 
       clearInterval(movingLoop)
+
+      const googleOptions = {
+        mapOptions: {styles: rand() < 0 ? darkMapStyle : mapStyle}
+      }
+      if (tileLayer) map.removeLayer(tileLayer.googleLayer)
+      tileLayer = new L.GoogleGridLayer(null, googleOptions)
+      map.addLayer(tileLayer)
 
       const city = CITIES[currentCity]
       map.setView(city.center, city.zoom)
