@@ -11,12 +11,20 @@ import 'leaflet/dist/leaflet.css'
 
 import 'src/styles.css'
 
+import logoPng from 'src/logo.png'
+
 import bluevetPng1 from 'src/images/bluevet.png'
 import bluevetPng2 from 'src/images/bluevet2.png'
 import bluevetPng3 from 'src/images/bluevet3.png'
 import bluevetPng4 from 'src/images/bluevet4.png'
+import bluevetPng5 from 'src/images/bluevet5.png'
+import bluevetPng6 from 'src/images/bluevet6.png'
 
 import {CITIES} from 'src/cities'
+
+const API_KEY = 'AIzaSyAEKADDbfh4NsgOuAtaeazXJi9XZrkVcjQ'
+const NUM_BLUEVETS = 20
+const CITY_SWITCH_TIMEOUT = 20000
 
 const logHandler = logger.getLogger()
 
@@ -33,6 +41,8 @@ const bouvIcons = [
   makeIcon(bluevetPng2, 96),
   makeIcon(bluevetPng3, 103),
   makeIcon(bluevetPng4, 106),
+  makeIcon(bluevetPng5, 199),
+  makeIcon(bluevetPng6, 192),
 ]
 
 
@@ -50,6 +60,13 @@ function range (a = null, b = 0) {
 function bootstrap () {
   logHandler.debug('app loaded.')
 
+  const logoParent = document.getElementById('logo')
+  const logoItem = document.createElement('img')
+  logoItem.src = logoPng
+  logoItem.height = '40'
+  logoParent.appendChild(logoItem)
+
+
   const mapElement = document.getElementById('map')
   var map = new L.Map(mapElement, {
     maxZoom: 19,
@@ -58,17 +75,17 @@ function bootstrap () {
     zoomControl: true,
   })
 
-  gmaps_loader.load().then(() => {
+  gmaps_loader.load({apiKey: API_KEY}).then(() => {
     leaflet_google.load()
     map.addLayer(new L.GoogleGridLayer())
 
     for (let city of CITIES) {
-      const coords = range(8).map(() => [
+      const coords = range(NUM_BLUEVETS).map(() => [
 				city.center[0] + rand() * 0.02,
 				city.center[1] + rand() * 0.05
       ])
       city.markers = coords.map((coord, i) => L.marker(coord, {
-        icon: bouvIcons[i % 4],
+        icon: bouvIcons[i % bouvIcons.length],
       }))
       for (let marker of city.markers) {
         marker.addTo(map)
@@ -105,7 +122,7 @@ function bootstrap () {
       currentCity += 1
     }
 
-		setInterval(switchCity, 30000)
+		setInterval(switchCity, CITY_SWITCH_TIMEOUT)
     switchCity()
   })
 }
